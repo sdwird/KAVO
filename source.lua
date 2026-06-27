@@ -1,6 +1,6 @@
 --[[
-    Kavo UI Library - Fully Optimized Version
-    Rewritten for maximum performance, readability, and zero memory leaks.
+    Kavo UI Library - Fully Optimized & Enhanced Version
+    Features modern aesthetics, zero memory leaks, and high performance.
 ]]
 
 local Kavo = {}
@@ -8,6 +8,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
 
 local tweenInfo = TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
@@ -59,7 +60,7 @@ local function Create(className, properties, children)
     for k, v in pairs(properties or {}) do
         if k == "Theme" then
             for prop, themeKey in pairs(v) do ApplyTheme(inst, prop, themeKey) end
-        elseif type(k) == "number" then -- Assuming array of children
+        elseif type(k) == "number" then
             v.Parent = inst
         else
             inst[k] = v
@@ -73,8 +74,17 @@ local function MakeCorner(radius)
     return Create("UICorner", {CornerRadius = UDim.new(0, radius or 4)})
 end
 
+local function MakeStroke(thickness, transparency)
+    return Create("UIStroke", {
+        Thickness = thickness or 1,
+        Transparency = transparency or 0.8,
+        Theme = {Color = "SchemeColor"},
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    })
+end
+
 local function RippleEffect(btn)
-    local mouse = game.Players.LocalPlayer:GetMouse()
+    local mouse = Players.LocalPlayer:GetMouse()
     local ripple = Create("ImageLabel", {
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BackgroundTransparency = 1,
@@ -89,7 +99,7 @@ local function RippleEffect(btn)
     ripple.Position = UDim2.new(0, x, 0, y)
     
     local size = math.max(btn.AbsoluteSize.X, btn.AbsoluteSize.Y) * 1.5
-    local time = 0.35
+    local time = 0.4
     
     TweenService:Create(ripple, TweenInfo.new(time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
         Size = UDim2.new(0, size, 0, size),
@@ -137,7 +147,6 @@ end
 function Kavo.CreateLib(kavName, themeList)
     kavName = kavName or "Library"
     
-    -- Set Theme
     if type(themeList) == "string" and themes[themeList] then
         currentTheme = themes[themeList]
     elseif type(themeList) == "table" then
@@ -146,7 +155,6 @@ function Kavo.CreateLib(kavName, themeList)
         currentTheme = themes.DarkTheme
     end
 
-    -- Clear existing
     for _, v in pairs(CoreGui:GetChildren()) do
         if v.Name == LibName then v:Destroy() end
     end
@@ -157,7 +165,7 @@ function Kavo.CreateLib(kavName, themeList)
         Name = "Main", Parent = ScreenGui, ClipsDescendants = true,
         Position = UDim2.new(0.5, -262, 0.5, -159), Size = UDim2.new(0, 525, 0, 318),
         Theme = {BackgroundColor3 = "Background"}
-    }, { MakeCorner(4) })
+    }, { MakeCorner(4), MakeStroke(1, 0.7) })
 
     local MainHeader = Create("Frame", {
         Name = "MainHeader", Parent = Main, Size = UDim2.new(1, 0, 0, 29),
@@ -166,7 +174,7 @@ function Kavo.CreateLib(kavName, themeList)
         MakeCorner(4),
         Create("Frame", {Size = UDim2.new(1, 0, 0, 7), Position = UDim2.new(0, 0, 1, -7), BorderSizePixel = 0, Theme = {BackgroundColor3 = "Header"}}),
         Create("TextLabel", {
-            Text = kavName, Font = Enum.Font.Gotham, TextSize = 16, TextColor3 = Color3.fromRGB(245, 245, 245),
+            Text = kavName, Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.fromRGB(245, 245, 245),
             BackgroundTransparency = 1, Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(0, 200, 1, 0), TextXAlignment = Enum.TextXAlignment.Left
         })
     })
@@ -195,7 +203,7 @@ function Kavo.CreateLib(kavName, themeList)
     local TabFrames = Create("ScrollingFrame", {
         Name = "TabFrames", Parent = MainSide, BackgroundTransparency = 1, Size = UDim2.new(1, -14, 1, -10), Position = UDim2.new(0, 7, 0, 5),
         ScrollBarThickness = 0, CanvasSize = UDim2.new(0, 0, 0, 0)
-    }, { Create("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 3)}) })
+    }, { Create("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 4)}) })
 
     local Pages = Create("Folder", {Name = "Pages", Parent = Main})
     local PageContainer = Create("Frame", {
@@ -203,11 +211,10 @@ function Kavo.CreateLib(kavName, themeList)
         Position = UDim2.new(0, 155, 0, 35), Size = UDim2.new(1, -165, 1, -45)
     })
 
-    -- Tooltip Setup
     local TooltipFrame = Create("Frame", {
         Parent = ScreenGui, Size = UDim2.new(0, 0, 0, 25), BackgroundColor3 = Color3.fromRGB(20, 20, 20), Visible = false, ZIndex = 100, ClipsDescendants = true
     }, {
-        MakeCorner(4),
+        MakeCorner(4), MakeStroke(1, 0.5),
         Create("TextLabel", {Name = "Text", BackgroundTransparency = 1, Size = UDim2.new(1, -10, 1, 0), Position = UDim2.new(0, 5, 0, 0),
         Font = Enum.Font.GothamSemibold, TextSize = 13, Theme = {TextColor3 = "TextColor"}, TextXAlignment = Enum.TextXAlignment.Left})
     })
@@ -220,7 +227,7 @@ function Kavo.CreateLib(kavName, themeList)
         local conn
         conn = RunService.RenderStepped:Connect(function()
             local mouse = UserInputService:GetMouseLocation()
-            TooltipFrame.Position = UDim2.new(0, mouse.X + 15, 0, mouse.Y - 15)
+            TooltipFrame.Position = UDim2.new(0, mouse.X + 15, 0, mouse.Y - 20)
         end)
         return conn
     end
@@ -237,14 +244,14 @@ function Kavo.CreateLib(kavName, themeList)
     function Tabs:NewTab(tabName)
         local TabBtn = Create("TextButton", {
             Parent = TabFrames, Size = UDim2.new(1, 0, 0, 28), BackgroundTransparency = firstTab and 0 or 1, AutoButtonColor = false,
-            Text = tabName, Font = Enum.Font.Gotham, TextSize = 14,
+            Text = tabName, Font = Enum.Font.GothamSemibold, TextSize = 14,
             Theme = {BackgroundColor3 = "SchemeColor", TextColor3 = "TextColor"}
         }, {MakeCorner(4)})
 
         local Page = Create("ScrollingFrame", {
             Parent = PageContainer, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ScrollBarThickness = 4, Visible = firstTab,
             Theme = {ScrollBarImageColor3 = "SchemeColor"}
-        }, { Create("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 6)}) })
+        }, { Create("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8)}) })
         
         Page.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
             Page.CanvasSize = UDim2.new(0, 0, 0, Page.UIListLayout.AbsoluteContentSize.Y)
@@ -280,23 +287,22 @@ function Kavo.CreateLib(kavName, themeList)
                     MakeCorner(4),
                     Create("TextLabel", {
                         BackgroundTransparency = 1, Size = UDim2.new(1, -10, 1, 0), Position = UDim2.new(0, 10, 0, 0),
-                        Font = Enum.Font.Gotham, Text = secName, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left, Theme = {TextColor3 = "TextColor"}
+                        Font = Enum.Font.GothamBold, Text = secName, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left, Theme = {TextColor3 = "TextColor"}
                     })
                 })
             end
 
             local Elements = {}
 
-            -- Helper to wrap element creation interactions
             local function Wrapper(title, infoText)
                 local btn = Create("TextButton", {
-                    Parent = SectionFrame, Size = UDim2.new(1, 0, 0, 33), AutoButtonColor = false, Text = "",
-                    Theme = {BackgroundColor3 = "ElementColor"}
+                    Parent = SectionFrame, Size = UDim2.new(1, 0, 0, 35), AutoButtonColor = false, Text = "",
+                    ClipsDescendants = true, Theme = {BackgroundColor3 = "ElementColor"}
                 }, {
-                    MakeCorner(4),
+                    MakeCorner(4), MakeStroke(1, 0.8),
                     Create("TextLabel", {
                         Name = "Title", BackgroundTransparency = 1, Size = UDim2.new(1, -40, 1, 0), Position = UDim2.new(0, 35, 0, 0),
-                        Font = Enum.Font.GothamSemibold, Text = title, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left, Theme = {TextColor3 = "TextColor"}
+                        Font = Enum.Font.GothamSemibold, Text = title, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, Theme = {TextColor3 = "TextColor"}
                     })
                 })
 
@@ -305,7 +311,7 @@ function Kavo.CreateLib(kavName, themeList)
 
                 if infoText and infoText ~= "" then
                     local infoIcon = Create("ImageLabel", {
-                        Parent = btn, BackgroundTransparency = 1, Size = UDim2.new(0, 20, 0, 20), Position = UDim2.new(1, -25, 0.5, -10),
+                        Parent = btn, BackgroundTransparency = 1, Size = UDim2.new(0, 18, 0, 18), Position = UDim2.new(1, -25, 0.5, -9),
                         Image = "rbxassetid://3926305904", ImageRectOffset = Vector2.new(764, 764), ImageRectSize = Vector2.new(36, 36),
                         Theme = {ImageColor3 = "SchemeColor"}
                     })
@@ -313,6 +319,16 @@ function Kavo.CreateLib(kavName, themeList)
                 end
 
                 return btn
+            end
+
+            function Elements:NewLabel(text)
+                local lbl = Create("TextLabel", {
+                    Parent = SectionFrame, Size = UDim2.new(1, 0, 0, 30), BackgroundTransparency = 1,
+                    Font = Enum.Font.GothamSemibold, Text = text, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left,
+                    Theme = {TextColor3 = "TextColor"}
+                }, { Create("UIPadding", {PaddingLeft = UDim.new(0, 10)}) })
+                
+                return { UpdateLabel = function(self, newText) lbl.Text = newText end }
             end
 
             function Elements:NewButton(bname, tipINf, callback)
@@ -358,10 +374,10 @@ function Kavo.CreateLib(kavName, themeList)
                 })
                 
                 local box = Create("TextBox", {
-                    Parent = btn, Size = UDim2.new(0, 120, 0, 20), Position = UDim2.new(1, -155, 0.5, -10),
+                    Parent = btn, Size = UDim2.new(0, 120, 0, 22), Position = UDim2.new(1, -155, 0.5, -11),
                     Font = Enum.Font.Gotham, TextSize = 12, Text = "", PlaceholderText = "Type...", ClearTextOnFocus = false,
                     Theme = {BackgroundColor3 = "Background", TextColor3 = "TextColor"}
-                }, {MakeCorner(4)})
+                }, {MakeCorner(4), MakeStroke(1, 0.8)})
                 
                 box.FocusLost:Connect(function(enter)
                     if enter and callback then
@@ -387,9 +403,9 @@ function Kavo.CreateLib(kavName, themeList)
                 })
                 
                 local track = Create("Frame", {
-                    Parent = btn, Size = UDim2.new(0, 130, 0, 6), Position = UDim2.new(1, -165, 0.5, -3),
+                    Parent = btn, Size = UDim2.new(0, 130, 0, 8), Position = UDim2.new(1, -165, 0.5, -4),
                     Theme = {BackgroundColor3 = "Background"}
-                }, {MakeCorner(4)})
+                }, {MakeCorner(4), MakeStroke(1, 0.8)})
                 
                 local fill = Create("Frame", {
                     Parent = track, Size = UDim2.new(0, 0, 1, 0), Theme = {BackgroundColor3 = "SchemeColor"}
@@ -398,7 +414,7 @@ function Kavo.CreateLib(kavName, themeList)
                 local dragging = false
                 local function UpdateSlide(input)
                     local percent = math.clamp((input.Position.X - track.AbsolutePosition.X) / track.AbsoluteSize.X, 0, 1)
-                    fill.Size = UDim2.new(percent, 0, 1, 0)
+                    Tween(fill, {Size = UDim2.new(percent, 0, 1, 0)}, 0.05)
                     Value = math.floor(min + ((max - min) * percent))
                     valText.Text = tostring(Value)
                     if callback then pcall(callback, Value) end
@@ -416,6 +432,14 @@ function Kavo.CreateLib(kavName, themeList)
                 UserInputService.InputEnded:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
                 end)
+                
+                return { UpdateSlider = function(self, newVal)
+                    Value = math.clamp(newVal, min, max)
+                    local percent = (Value - min) / (max - min)
+                    Tween(fill, {Size = UDim2.new(percent, 0, 1, 0)}, 0.1)
+                    valText.Text = tostring(Value)
+                    if callback then pcall(callback, Value) end
+                end}
             end
 
             function Elements:NewDropdown(dropname, tip, list, callback)
@@ -423,7 +447,7 @@ function Kavo.CreateLib(kavName, themeList)
                 local open = false
                 
                 local DropIcon = Create("ImageLabel", {
-                    Parent = btn, BackgroundTransparency = 1, Size = UDim2.new(0, 20, 0, 20), Position = UDim2.new(0, 7, 0, 6),
+                    Parent = btn, BackgroundTransparency = 1, Size = UDim2.new(0, 20, 0, 20), Position = UDim2.new(0, 7, 0, 8),
                     Image = "rbxassetid://3926305904", ImageRectOffset = Vector2.new(644, 364), ImageRectSize = Vector2.new(36, 36), Theme = {ImageColor3 = "SchemeColor"}
                 })
 
@@ -438,12 +462,12 @@ function Kavo.CreateLib(kavName, themeList)
                         local opt = Create("TextButton", {
                             Parent = ListFrame, Size = UDim2.new(1, 0, 0, 30), AutoButtonColor = false, Font = Enum.Font.Gotham,
                             Text = "  " .. tostring(v), TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, Theme = {BackgroundColor3 = "Background", TextColor3 = "TextColor"}
-                        }, {MakeCorner(4)})
+                        }, {MakeCorner(4), MakeStroke(1, 0.9)})
                         opt.MouseEnter:Connect(function() Tween(opt, {BackgroundColor3 = Lighten(currentTheme.Background, 0.05)}) end)
                         opt.MouseLeave:Connect(function() Tween(opt, {BackgroundColor3 = currentTheme.Background}) end)
                         opt.MouseButton1Click:Connect(function()
                             btn.Title.Text = tostring(v)
-                            btn.MouseButton1Click:Fire() -- close drop
+                            btn.MouseButton1Click:Fire()
                             if callback then pcall(callback, v) end
                         end)
                     end
@@ -453,6 +477,7 @@ function Kavo.CreateLib(kavName, themeList)
                 btn.MouseButton1Click:Connect(function()
                     RippleEffect(btn)
                     open = not open
+                    Tween(DropIcon, {Rotation = open and 180 or 0})
                     if open then
                         ListFrame.Visible = true
                         Tween(ListFrame, {Size = UDim2.new(1, 0, 0, ListLayout.AbsoluteContentSize.Y)})
@@ -464,6 +489,91 @@ function Kavo.CreateLib(kavName, themeList)
                 end)
                 
                 return { Refresh = function(self, newList) Populate(newList) end }
+            end
+            
+            function Elements:NewColorPicker(cname, tip, defaultColor, callback)
+                local btn = Wrapper(cname, tip)
+                local open = false
+                local color = defaultColor or Color3.fromRGB(255, 255, 255)
+                local h, s, v = Color3.toHSV(color)
+                
+                local ColorPreview = Create("Frame", {
+                    Parent = btn, Size = UDim2.new(0, 42, 0, 18), Position = UDim2.new(1, -70, 0.5, -9),
+                    BackgroundColor3 = color
+                }, {MakeCorner(4), MakeStroke(1, 0.5)})
+
+                local PickerFrame = Create("Frame", {
+                    Parent = SectionFrame, Size = UDim2.new(1, 0, 0, 0), ClipsDescendants = true, Visible = false, Theme = {BackgroundColor3 = "ElementColor"}
+                }, {MakeCorner(4), MakeStroke(1, 0.8)})
+
+                local SatVibranceMap = Create("ImageButton", {
+                    Parent = PickerFrame, Size = UDim2.new(0, 211, 0, 93), Position = UDim2.new(0, 10, 0, 10),
+                    Image = "http://www.roblox.com/asset/?id=6523286724", AutoButtonColor = false
+                }, {MakeCorner(4)})
+                
+                local HueMap = Create("ImageButton", {
+                    Parent = PickerFrame, Size = UDim2.new(0, 18, 0, 93), Position = UDim2.new(0, 235, 0, 10),
+                    Image = "http://www.roblox.com/asset/?id=6523291212", AutoButtonColor = false
+                }, {MakeCorner(4)})
+
+                local SVDot = Create("Frame", { Parent = SatVibranceMap, Size = UDim2.new(0, 6, 0, 6), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Color3.fromRGB(255,255,255) }, {MakeCorner(3)})
+                local HueDot = Create("Frame", { Parent = HueMap, Size = UDim2.new(1, 4, 0, 4), Position = UDim2.new(0, -2, 0, 0), BackgroundColor3 = Color3.fromRGB(255,255,255) }, {MakeCorner(2)})
+
+                local function UpdateColor()
+                    color = Color3.fromHSV(h, s, v)
+                    ColorPreview.BackgroundColor3 = color
+                    SVDot.Position = UDim2.new(s, 0, 1 - v, 0)
+                    HueDot.Position = UDim2.new(0, -2, 1 - h, 0)
+                    if callback then pcall(callback, color) end
+                end
+
+                local draggingSV, draggingHue = false, false
+                
+                local function TrackSV(input)
+                    local X = math.clamp((input.Position.X - SatVibranceMap.AbsolutePosition.X) / SatVibranceMap.AbsoluteSize.X, 0, 1)
+                    local Y = math.clamp((input.Position.Y - SatVibranceMap.AbsolutePosition.Y) / SatVibranceMap.AbsoluteSize.Y, 0, 1)
+                    s, v = X, 1 - Y
+                    UpdateColor()
+                end
+
+                local function TrackHue(input)
+                    local Y = math.clamp((input.Position.Y - HueMap.AbsolutePosition.Y) / HueMap.AbsoluteSize.Y, 0, 1)
+                    h = 1 - Y
+                    UpdateColor()
+                end
+
+                SatVibranceMap.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSV = true TrackSV(input) end end)
+                HueMap.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingHue = true TrackHue(input) end end)
+                
+                UserInputService.InputChanged:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement then
+                        if draggingSV then TrackSV(input) elseif draggingHue then TrackHue(input) end
+                    end
+                end)
+                UserInputService.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then draggingSV, draggingHue = false, false end
+                end)
+
+                btn.MouseButton1Click:Connect(function()
+                    RippleEffect(btn)
+                    open = not open
+                    if open then
+                        PickerFrame.Visible = true
+                        Tween(PickerFrame, {Size = UDim2.new(1, 0, 0, 113)})
+                        UpdateColor()
+                    else
+                        local t = TweenService:Create(PickerFrame, tweenInfo, {Size = UDim2.new(1, 0, 0, 0)})
+                        t:Play()
+                        t.Completed:Connect(function() if not open then PickerFrame.Visible = false end end)
+                    end
+                end)
+                
+                UpdateColor()
+                
+                return { UpdateColor = function(self, newCol)
+                    h, s, v = Color3.toHSV(newCol)
+                    UpdateColor()
+                end}
             end
 
             function Elements:NewKeybind(kname, tip, default, callback)
