@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kavo UI - The Ultimate Roblox UI Library</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- PrismJS for Lua Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        background: '#06080D',
+                        surface: '#0D1117',
+                        surfaceBorder: '#1F2937',
+                        primary: '#6366F1',
+                        primaryGlow: 'rgba(99, 102, 241, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { 
+            background-color: #06080D; 
+            color: #9CA3AF; 
+            overflow-x: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
+
+        /* Glowing Background Effects */
+        .glow-bg {
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .glow-bg-2 {
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 40vw;
+            height: 40vw;
+            background: radial-gradient(circle, rgba(168,85,247,0.06) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* PrismJS Overrides for aesthetic */
+        pre[class*="language-"] {
+            background: #0D1117 !important;
+            margin: 0 !important;
+            border-radius: 0 0 0.75rem 0.75rem !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 1.25rem !important;
+            font-size: 0.875rem !important;
+        }
+        code[class*="language-"] {
+            text-shadow: none !important;
+            font-family: 'JetBrains Mono', monospace !important;
+        }
+
+        /* Sidebar active state */
+        .nav-link.active {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: #818CF8;
+            border-left-color: #6366F1;
+        }
+    </style>
+</head>
+<body class="selection:bg-indigo-500/30 selection:text-indigo-200">
+
+    <div class="glow-bg"></div>
+    <div class="glow-bg-2"></div>
+
+    <div class="md:hidden flex items-center justify-between p-4 border-b border-surfaceBorder bg-background/80 backdrop-blur-xl sticky top-0 z-50">
+        <div class="font-black text-xl tracking-tighter text-white flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <span class="text-white">K</span>
+            </div>
+            Kavo<span class="text-indigo-400 font-light">Docs</span>
+        </div>
+        <button id="mobile-menu-btn" class="text-gray-400 hover:text-white transition-colors focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+        </button>
+    </div>
+
+    <div class="flex max-w-[1400px] mx-auto min-h-screen relative">
+        
+        <aside id="sidebar" class="hidden md:flex flex-col w-64 lg:w-72 flex-shrink-0 sticky top-0 h-screen overflow-y-auto border-r border-surfaceBorder bg-background/50 backdrop-blur-xl z-40 fixed md:relative w-full transition-transform duration-300">
+            <div class="p-6">
+                <div class="hidden md:flex font-black text-2xl tracking-tighter text-white items-center gap-3 mb-10">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                        <span class="text-white text-xl">K</span>
+                    </div>
+                    <div>
+                        Kavo<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 font-light block text-xs tracking-widest uppercase mt-0.5">Library</span>
+                    </div>
+                </div>
+
+                <nav class="space-y-1" id="nav-menu">
+                    <h5 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 px-4">Getting Started</h5>
+                    <a href="#introduction" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Introduction</a>
+                    <a href="#initialization" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Creating the UI</a>
+                    <a href="#themes" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Themes & Colors</a>
+                    
+                    <h5 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 mt-8 px-4">Layout</h5>
+                    <a href="#tabs" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Tabs</a>
+                    <a href="#sections" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Sections</a>
+
+                    <h5 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 mt-8 px-4">Components</h5>
+                    <a href="#labels" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Labels</a>
+                    <a href="#buttons" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Buttons</a>
+                    <a href="#toggles" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Toggles</a>
+                    <a href="#sliders" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Sliders</a>
+                    <a href="#textboxes" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Textboxes</a>
+                    <a href="#keybinds" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Keybinds</a>
+                    <a href="#dropdowns" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Dropdowns</a>
+                    <a href="#colorpickers" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Color Pickers</a>
+                    
+                    <h5 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 mt-8 px-4">Examples</h5>
+                    <a href="#example-script" class="nav-link flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-r-lg border-l-2 border-transparent text-gray-400 hover:text-white hover:bg-surface transition-all">Full Script Example</a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="flex-1 min-w-0 py-10 px-6 md:px-12 lg:px-20 overflow-x-hidden">
+            
+            <div class="max-w-4xl mx-auto space-y-24 pb-20">
+                
+                <!-- Introduction -->
+                <section id="introduction" class="scroll-mt-24">
+                    <div class="mb-8">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-sm font-medium border border-indigo-500/20 mb-6">
+                            <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span></span>
+                            Updated for V2
+                        </div>
+                        <h1 class="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500 tracking-tight mb-4">Welcome to Kavo UI</h1>
+                        <p class="text-lg text-gray-400 leading-relaxed">The cleanest, most optimized UI library for Roblox exploit scripts. Built for massive hub projects requiring smooth performance and elegant design.</p>
+                    </div>
+
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-4 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <div>
+                                <h3 class="text-sm font-bold text-white">Getting the Loadstring</h3>
+                                <p class="text-xs text-gray-400 mt-1">Execute this via your executor to load the module.</p>
+                            </div>
+                            <button class="copy-btn flex items-center gap-2 px-3 py-1.5 bg-surface border border-surfaceBorder hover:bg-gray-800 rounded-md text-xs font-medium text-gray-300 transition-colors">
+                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                                Copy Code
+                            </button>
+                        </div>
+                        <pre><code class="language-lua">local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/sdwird/KAVO/refs/heads/main/source.lua"))()</code></pre>
+                    </div>
+                </section>
+
+                <section id="initialization" class="scroll-mt-24">
+                    <h2 class="text-3xl font-bold text-white mb-6 tracking-tight">Creating the UI</h2>
+                    <p class="text-gray-400 mb-6">Initialize the main window. You can provide a title and a default theme name.</p>
+                    
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl mb-8">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">local Window = Library.CreateLib("My Script Hub", "DarkTheme")</code></pre>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-white mb-4">Toggling UI with Keybinds</h3>
+                    <p class="text-gray-400 mb-4">You can easily bind a key to show/hide the entire library window.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">-- Later inside a Section
+Section:NewKeybind("Toggle UI", "Hides or shows the GUI", Enum.KeyCode.RightShift, function()
+    Library:ToggleUI()
+end)</code></pre>
+                    </div>
+                </section>
+
+                <section id="themes" class="scroll-mt-24">
+                    <h2 class="text-3xl font-bold text-white mb-6 tracking-tight">Themes & Colors</h2>
+                    <p class="text-gray-400 mb-6">Kavo comes packed with several beautifully crafted preset themes.</p>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                        <div class="px-4 py-3 bg-surface border border-surfaceBorder rounded-lg text-center font-mono text-sm text-gray-300">"DarkTheme"</div>
+                        <div class="px-4 py-3 bg-surface border border-surfaceBorder rounded-lg text-center font-mono text-sm text-gray-300">"LightTheme"</div>
+                        <div class="px-4 py-3 bg-surface border border-surfaceBorder rounded-lg text-center font-mono text-sm text-gray-300">"BloodTheme"</div>
+                        <div class="px-4 py-3 bg-surface border border-surfaceBorder rounded-lg text-center font-mono text-sm text-gray-300">"GrapeTheme"</div>
+                        <div class="px-4 py-3 bg-surface border border-surfaceBorder rounded-lg text-center font-mono text-sm text-gray-300">"Ocean"</div>
+                        <div class="px-4 py-3 bg-surface border border-surfaceBorder rounded-lg text-center font-mono text-sm text-gray-300">"Midnight"</div>
+                        <div class="px-4 py-3 bg-surface border border-surfaceBorder rounded-lg text-center font-mono text-sm text-gray-300">"Sentinel"</div>
+                        <div class="px-4 py-3 bg-surface border border-surfaceBorder rounded-lg text-center font-mono text-sm text-gray-300">"Synapse"</div>
+                        <div class="px-4 py-3 bg-surface border border-surfaceBorder rounded-lg text-center font-mono text-sm text-gray-300">"Serpent"</div>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-white mb-4">Applying Custom Themes</h3>
+                    <p class="text-gray-400 mb-4">Instead of a string, pass a color table when creating your library to inject a custom theme.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl mb-8">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">local colors = {
+    SchemeColor = Color3.fromRGB(0,255,255),
+    Background = Color3.fromRGB(0, 0, 0),
+    Header = Color3.fromRGB(0, 0, 0),
+    TextColor = Color3.fromRGB(255,255,255),
+    ElementColor = Color3.fromRGB(20, 20, 20)
+}
+
+local Window = Library.CreateLib("Custom Hub", colors)</code></pre>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-white mb-4">In-Game Theme Builder</h3>
+                    <p class="text-gray-400 mb-4">Allow your users to build their own UI theme by iterating over the theme values.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">for theme, color in pairs(colors) do
+    Section:NewColorPicker(theme, "Change your "..theme, color, function(color3)
+        Library:ChangeColor(theme, color3)
+    end)
+end</code></pre>
+                    </div>
+                </section>
+
+                <hr class="border-surfaceBorder">
+
+                <section id="tabs" class="scroll-mt-24">
+                    <h2 class="text-3xl font-bold text-white mb-6 tracking-tight">Tabs</h2>
+                    <p class="text-gray-400 mb-4">Tabs populate the left sidebar of the UI. The first tab created automatically becomes visible.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">local Tab = Window:NewTab("Main Settings")</code></pre>
+                    </div>
+                </section>
+
+                <section id="sections" class="scroll-mt-24">
+                    <h2 class="text-3xl font-bold text-white mb-6 tracking-tight">Sections</h2>
+                    <p class="text-gray-400 mb-4">Sections group your components together under colored headers within a Tab.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl mb-8">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">local Section = Tab:NewSection("Player Exploits")</code></pre>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-white mb-4">Updating Sections</h3>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">Section:UpdateSection("New Updated Title")</code></pre>
+                    </div>
+                </section>
+
+                <hr class="border-surfaceBorder">
+                
+                <div class="mb-8">
+                    <h2 class="text-4xl font-black text-white tracking-tight">Components</h2>
+                    <p class="text-lg text-gray-400 mt-2">The interactive elements that build out your script functionality.</p>
+                </div>
+
+                <!-- Labels -->
+                <section id="labels" class="scroll-mt-24">
+                    <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+                        Labels
+                        <span class="px-2 py-0.5 rounded text-xs font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">RichText Supported</span>
+                    </h3>
+                    <p class="text-gray-400 mb-4">Displays static text. Supports Roblox RichText formatting.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">local myLabel = Section:NewLabel("Status: <b>Loading</b>")
+
+-- Update it later
+myLabel:UpdateLabel("Status: <font color='rgb(0,255,0)'>Ready</font>")</code></pre>
+                    </div>
+                </section>
+
+                <!-- Buttons -->
+                <section id="buttons" class="scroll-mt-24">
+                    <h3 class="text-2xl font-bold text-white mb-4">Buttons</h3>
+                    <p class="text-gray-400 mb-4">A standard clickable element with an integrated tooltip icon.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">local myButton = Section:NewButton("Kill All", "Instantly kills all enemies", function()
+    print("Clicked!")
+end)
+
+-- Update text
+myButton:UpdateButton("Already Clicked")</code></pre>
+                    </div>
+                </section>
+
+                <!-- Toggles -->
+                <section id="toggles" class="scroll-mt-24">
+                    <h3 class="text-2xl font-bold text-white mb-4">Toggles</h3>
+                    <p class="text-gray-400 mb-4">Boolean switches. You can update their text and force toggle their state from code.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">getgenv().Aimbot = false
+
+local myToggle = Section:NewToggle("Aimbot", "Enable auto aim", function(state)
+    getgenv().Aimbot = state
+    print("Aimbot:", state)
+end)
+
+-- Update text only
+myToggle:UpdateToggle("Silent Aim")
+
+-- Update text AND force State to TRUE
+myToggle:UpdateToggle("Silent Aim", true)</code></pre>
+                    </div>
+                </section>
+
+                <!-- Sliders -->
+                <section id="sliders" class="scroll-mt-24">
+                    <h3 class="text-2xl font-bold text-white mb-4">Sliders</h3>
+                    <p class="text-gray-400 mb-4">Select numerical values. Note the parameter order: <code>Max</code>, then <code>Min</code>.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">-- (Name, Tooltip, MaxValue, MinValue, Callback)
+Section:NewSlider("WalkSpeed", "Adjust your speed", 500, 16, function(s)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+end)</code></pre>
+                    </div>
+                </section>
+
+                <!-- TextBoxes -->
+                <section id="textboxes" class="scroll-mt-24">
+                    <h3 class="text-2xl font-bold text-white mb-4">Textboxes</h3>
+                    <p class="text-gray-400 mb-4">Input raw string text. Fires the callback when the user presses Enter or clicks away.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">Section:NewTextBox("Target Player", "Who to teleport to", function(txt)
+    print("Entered:", txt)
+end)</code></pre>
+                    </div>
+                </section>
+
+                <!-- Keybinds -->
+                <section id="keybinds" class="scroll-mt-24">
+                    <h3 class="text-2xl font-bold text-white mb-4">Keybinds</h3>
+                    <p class="text-gray-400 mb-4">Assign functions to keyboard presses. Users can click to change the bind.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">Section:NewKeybind("Fly Key", "Press to fly", Enum.KeyCode.F, function()
+    print("Fly executed")
+end)</code></pre>
+                    </div>
+                </section>
+
+                <!-- Dropdowns -->
+                <section id="dropdowns" class="scroll-mt-24">
+                    <h3 class="text-2xl font-bold text-white mb-4">Dropdowns</h3>
+                    <p class="text-gray-400 mb-4">Select an item from a list. You can dynamically refresh this list later.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">local oldList = {"Apple", "Banana"}
+local newList = {"Orange", "Grape"}
+
+local dropdown = Section:NewDropdown("Fruits", "Select a fruit", oldList, function(selected)
+    print("Selected:", selected)
+end)
+
+-- Sometime later, maybe inside a button click:
+dropdown:Refresh(newList)</code></pre>
+                    </div>
+                </section>
+
+                <!-- Color Pickers -->
+                <section id="colorpickers" class="scroll-mt-24">
+                    <h3 class="text-2xl font-bold text-white mb-4">Color Pickers</h3>
+                    <p class="text-gray-400 mb-4">Full HSV visual color picker allowing users to customize colors.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">-- (Name, Tooltip, DefaultColor, Callback)
+Section:NewColorPicker("ESP Color", "Change enemy highlight", Color3.fromRGB(255, 0, 0), function(color)
+    print("New ESP Color:", color)
+end)</code></pre>
+                    </div>
+                </section>
+
+                <hr class="border-surfaceBorder">
+
+                <!-- Full Example Script -->
+                <section id="example-script" class="scroll-mt-24">
+                    <h2 class="text-3xl font-bold text-white mb-6 tracking-tight">Full Script Example</h2>
+                    <p class="text-gray-400 mb-6">Here is a complete, ready-to-use example showcasing how to build a basic Player Hub using multiple components, tabs, and a custom toggle keybind.</p>
+                    <div class="bg-surface border border-surfaceBorder rounded-xl overflow-hidden shadow-2xl">
+                        <div class="px-5 py-3 border-b border-surfaceBorder bg-background/50 flex justify-between items-center">
+                            <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">Lua</span>
+                            <button class="copy-btn text-gray-500 hover:text-white transition-colors p-1"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg></button>
+                        </div>
+                        <pre><code class="language-lua">local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/sdwird/KAVO/refs/heads/main/source.lua"))()
+local Window = Library.CreateLib("Universal Hub", "Ocean")
+
+-- [ 1. Main Player Tab ] --
+local MainTab = Window:NewTab("Player")
+local PlayerSection = MainTab:NewSection("Movement Modifications")
+
+PlayerSection:NewSlider("WalkSpeed", "Changes how fast you walk", 250, 16, function(s)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+end)
+
+PlayerSection:NewSlider("JumpPower", "Changes how high you jump", 250, 50, function(s)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = s
+end)
+
+PlayerSection:NewToggle("Infinite Jump", "Allows you to jump endlessly", function(state)
+    getgenv().InfJump = state
+    game:GetService("UserInputService").JumpRequest:Connect(function()
+        if getgenv().InfJump then
+            game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
+        end
+    end)
+end)
+
+-- [ 2. Visuals Tab ] --
+local VisualsTab = Window:NewTab("Visuals")
+local EspSection = VisualsTab:NewSection("ESP Settings")
+
+EspSection:NewToggle("Enable ESP", "Shows players through walls", function(state)
+    print("ESP State:", state)
+end)
+
+EspSection:NewColorPicker("ESP Color", "Color of the ESP highlight", Color3.fromRGB(255, 0, 0), function(color)
+    print("Color changed to:", color)
+end)
+
+-- [ 3. Settings Tab ] --
+local SettingsTab = Window:NewTab("Settings")
+local SettingsSection = SettingsTab:NewSection("UI Configuration")
+
+SettingsSection:NewKeybind("Toggle UI", "Hides or shows the GUI", Enum.KeyCode.RightShift, function()
+    Library:ToggleUI()
+end)</code></pre>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- PrismJS Core and Lua Language -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-lua.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            
+            mobileBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('flex');
+            });
+
+            // ScrollSpy Navigation Logic
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px 0px -60% 0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.remove('active', 'bg-indigo-500/10', 'text-indigo-400', 'border-indigo-500');
+                            link.classList.add('text-gray-400', 'border-transparent');
+                            
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('active', 'bg-indigo-500/10', 'text-indigo-400', 'border-indigo-500');
+                                link.classList.remove('text-gray-400', 'border-transparent');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+
+            // Custom Copy Button Logic
+            const copyButtons = document.querySelectorAll('.copy-btn');
+            copyButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const codeBlock = btn.parentElement.nextElementSibling.querySelector('code');
+                    const text = codeBlock.innerText;
+
+                    // Fallback textarea creation for iframes
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        
+                        const originalHTML = btn.innerHTML;
+                        btn.innerHTML = `<svg class="w-4 h-4 text-emerald-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+                        btn.classList.add('text-emerald-400');
+                        btn.classList.remove('text-gray-500');
+
+                        setTimeout(() => {
+                            btn.innerHTML = originalHTML;
+                            btn.classList.remove('text-emerald-400');
+                            btn.classList.add('text-gray-500');
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Failed to copy', err);
+                    }
+                    document.body.removeChild(textArea);
+                });
+            });
+
+            // Close mobile menu on link click
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.add('hidden');
+                        sidebar.classList.remove('flex');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
