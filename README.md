@@ -1,2 +1,2 @@
 # KAVO
-kavo ui but better hahaha
+https://sdwird.github.io/KAVO/
